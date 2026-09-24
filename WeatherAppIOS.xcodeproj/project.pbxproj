@@ -24,17 +24,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		29A2CC563065841E00662DEA /* WeatherAppIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherAppIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		29A2CC683065842000662DEA /* WeatherAppIOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WeatherAppIOSTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		29A2CC723065842000662DEA /* WeatherAppIOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WeatherAppIOSUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		29A2CC683065842000662DEA /* WeatherAppIOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = WeatherAppIOSTests.xctest; path = "/Users/solitmop/Desktop/MyApps/WeatherAppIOS/build/Debug-iphoneos/WeatherAppIOS.app/PlugIns/WeatherAppIOSTests.xctest"; sourceTree = "<absolute>"; };
+		29A2CC723065842000662DEA /* WeatherAppIOSUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = WeatherAppIOSUITests.xctest; path = "/Users/solitmop/Desktop/MyApps/WeatherAppIOS/build/Debug-iphoneos/WeatherAppIOSUITests-Runner.app/PlugIns/WeatherAppIOSUITests.xctest"; sourceTree = "<absolute>"; };
+		29A2CC923065874800662DEA /* WeatherAppIOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WeatherAppIOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		29A2CC583065841E00662DEA /* WeatherAppIOS */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = WeatherAppIOS;
-			sourceTree = "<group>";
-		};
 		29A2CC6B3065842000662DEA /* WeatherAppIOSTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = WeatherAppIOSTests;
@@ -43,6 +38,31 @@
 		29A2CC753065842000662DEA /* WeatherAppIOSUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = WeatherAppIOSUITests;
+			sourceTree = "<group>";
+		};
+		29A2CC853065850B00662DEA /* App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = App;
+			sourceTree = "<group>";
+		};
+		29A2CC863065851B00662DEA /* Models */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Models;
+			sourceTree = "<group>";
+		};
+		29A2CC883065856E00662DEA /* Views */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Views;
+			sourceTree = "<group>";
+		};
+		29A2CC893065858D00662DEA /* ViewModels */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		29A2CC8A306585A700662DEA /* Services */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Services;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,21 +95,15 @@
 		29A2CC4D3065841E00662DEA = {
 			isa = PBXGroup;
 			children = (
-				29A2CC583065841E00662DEA /* WeatherAppIOS */,
+				29A2CC853065850B00662DEA /* App */,
+				29A2CC863065851B00662DEA /* Models */,
+				29A2CC883065856E00662DEA /* Views */,
+				29A2CC893065858D00662DEA /* ViewModels */,
+				29A2CC8A306585A700662DEA /* Services */,
 				29A2CC6B3065842000662DEA /* WeatherAppIOSTests */,
 				29A2CC753065842000662DEA /* WeatherAppIOSUITests */,
-				29A2CC573065841E00662DEA /* Products */,
+				29A2CC923065874800662DEA /* WeatherAppIOS.app */,
 			);
-			sourceTree = "<group>";
-		};
-		29A2CC573065841E00662DEA /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				29A2CC563065841E00662DEA /* WeatherAppIOS.app */,
-				29A2CC683065842000662DEA /* WeatherAppIOSTests.xctest */,
-				29A2CC723065842000662DEA /* WeatherAppIOSUITests.xctest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -108,13 +122,16 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				29A2CC583065841E00662DEA /* WeatherAppIOS */,
+				29A2CC853065850B00662DEA /* App */,
+				29A2CC863065851B00662DEA /* Models */,
+				29A2CC893065858D00662DEA /* ViewModels */,
+				29A2CC8A306585A700662DEA /* Services */,
 			);
 			name = WeatherAppIOS;
 			packageProductDependencies = (
 			);
 			productName = WeatherAppIOS;
-			productReference = 29A2CC563065841E00662DEA /* WeatherAppIOS.app */;
+			productReference = 29A2CC923065874800662DEA /* WeatherAppIOS.app */;
 			productType = "com.apple.product-type.application";
 		};
 		29A2CC673065842000662DEA /* WeatherAppIOSTests */ = {
@@ -155,6 +172,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				29A2CC753065842000662DEA /* WeatherAppIOSUITests */,
+				29A2CC883065856E00662DEA /* Views */,
 			);
 			name = WeatherAppIOSUITests;
 			packageProductDependencies = (
@@ -175,6 +193,7 @@
 				TargetAttributes = {
 					29A2CC553065841E00662DEA = {
 						CreatedOnToolsVersion = 16.4;
+						LastSwiftMigration = 1640;
 					};
 					29A2CC673065842000662DEA = {
 						CreatedOnToolsVersion = 16.4;
@@ -196,7 +215,7 @@
 			mainGroup = 29A2CC4D3065841E00662DEA;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 29A2CC573065841E00662DEA /* Products */;
+			productRefGroup = 29A2CC4D3065841E00662DEA;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -393,6 +412,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
@@ -410,6 +430,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = ITMO.WeatherAppIOS;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -420,6 +441,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
