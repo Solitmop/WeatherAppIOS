@@ -33,6 +33,10 @@ public final class CityListViewModel {
         self.weatherService = weatherService
         self.storageService = storageService
         self.savedCities = storageService.loadFavoriteCities()
+
+        // Заполняем список из дискового кэша для мгновенного отображения без ожидания сети
+        let cachedDict = storageService.loadAllCachedWeather()
+        self.savedCitiesWeather = savedCities.compactMap { cachedDict[$0.id] }
     }
 
     /// Загрузка погоды для всех сохраненных городов
@@ -40,19 +44,43 @@ public final class CityListViewModel {
         isLoading = true
         errorMessage = nil
 
+        // Если список в памяти пуст, подтягиваем данные из кэша
+        if savedCitiesWeather.isEmpty {
+            let cachedDict = storageService.loadAllCachedWeather()
+            self.savedCitiesWeather = savedCities.compactMap { cachedDict[$0.id] }
+        }
+
         var updatedList: [CityWeather] = []
 
         for city in savedCities {
             do {
                 let weather = try await weatherService.fetchWeather(for: city)
                 updatedList.append(weather)
+                // 1. Сохранение сразу после получения данных
+                storageService.saveCachedWeather(weather)
             } catch {
                 print("Failed to fetch weather for \(city.name): \(error)")
+                // В случае ошибки сети используем кэш, если он есть
+                if let cached = storageService.loadCachedWeather(for: city.id) {
+                    updatedList.append(cached)
+                }
             }
         }
 
-        self.savedCitiesWeather = updatedList
+        if !updatedList.isEmpty {
+            self.savedCitiesWeather = updatedList
+        }
         self.isLoading = false
+    }
+
+    /// Сохранение перед уходом в спящий режим
+    public func saveStateBeforeSleep() {
+        var dict: [UUID: CityWeather] = [:]
+        for weather in savedCitiesWeather {
+            dict[weather.city.id] = weather
+        }
+        storageService.saveAllCachedWeather(dict)
+        storageService.saveFavoriteCities(savedCities)
     }
 
     /// Поиск городов с дебаунсом 300мс

@@ -17,6 +17,7 @@ WeatherAppIOS/
 │   ├── City.swift                          # Модель города (координаты, регион, часовой пояс, список городов РФ)
 │   ├── WeatherModels.swift                 # Структуры: CurrentWeather, HourlyForecast, DailyForecast, WeatherMetrics, CityWeather
 │   ├── WeatherCondition.swift              # Enum погодных условий, SF Symbols и адаптивные палитры фона
+│   ├── CachedWeatherItem.swift             # Модель SwiftData (@Model) для долговременного кэширования погоды
 │   ├── AppSettings.swift                   # MetricFormatter (форматирование СИ: °C, м/с, гПа) и AppTheme (темы)
 │   └── UI/
 │       └── WeatherUIModel.swift            # Вспомогательные функции презентации (цвета УФ, угол компаса ветра, время)
@@ -24,7 +25,7 @@ WeatherAppIOS/
 ├── Services/                               # Слой сервисов и бизнес-логики (Service Layer)
 │   ├── WeatherServiceProtocol.swift        # Абстрактный протокол сервиса погоды и ошибки WeatherServiceError
 │   ├── MockWeatherService.swift            # Мок-сервис: генерация реалистичной погоды для городов РФ от текущего времени
-│   ├── StorageService.swift                # Работа с постоянной памятью (UserDefaults): сохранение избранного и настроек
+│   ├── StorageService.swift                # Хранилище: настройки/города в UserDefaults, кэш погоды в SwiftData
 │   └── LocationService.swift               # Асинхронная обертка над CoreLocation для работы с GPS (async/await)
 │
 ├── ViewModels/                             # Слой управления состоянием и презентационной логики (MVVM)
@@ -76,15 +77,17 @@ WeatherAppIOS/
   - Буфер поискового запроса (`searchQuery`, `searchResults`) и активная задача отмены дебаунса (`Task.cancel()`).
 
 ### 2. Долговременная память на диске (Persistent Storage)
-- **Механизм**: Системное хранилище `UserDefaults` через протокол `StorageServiceProtocol` и сервис `StorageService`.
-- **Что сохраняется на постоянной основе**:
-  1. **Список избранных городов (`favoriteCities`)**: массив объектов `City`. Перед сохранением массив кодируется в бинарный JSON (`Data`) через `JSONEncoder`, а при старте приложения декодируется через `JSONDecoder`.
-  2. **Идентификатор активного города (`lastSelectedCityId`)**: строковое представление UUID последнего просмотренного города. Благодаря этому приложение всегда открывается на том городе, где остановился пользователь.
+В проекте реализовано чистое разделение сфер ответственности (Separation of Concerns):
+- **Системное хранилище `UserDefaults`**:
+  1. **Список избранных городов (`favoriteCities`)**: массив объектов `City`, кодируемый в бинарный JSON (`Data`) через `JSONEncoder`.
+  2. **Идентификатор активного города (`lastSelectedCityId`)**: строковое представление UUID последнего просмотренного города для открытия на том же месте.
   3. **Тема оформления (`appTheme`)**: значение строкового перечисления ("system", "dark", "light").
-
-### 3. Архитектурный задел для масштабирования памяти
-- Так как сохранение вынесено за абстракцию `StorageServiceProtocol`, проект готов к расширению:
-  - **Offline-кэширование погоды**: для работы без интернета агрегат `CityWeather` можно сериализовать в директорию `Caches` или `Application Support`.
+- **База данных `SwiftData` (кэширование погоды)**:
+  - Реализована через сущность `@Model CachedWeatherItem` (`cityId`, `cityName`, `weatherData`, `cachedAt`).
+  - Управляется через нативные `ModelContainer` и `ModelContext`.
+  - **Сразу после получения данных**: при успешном запросе актуальный `CityWeather` сохраняется в SwiftData.
+  - **Перед уходом в спящий режим**: хук `@Environment(\.scenePhase)` (`.inactive` / `.background`) в `WeatherApp` гарантирует вызов `saveStateBeforeSleep()` и запись свежих данных в SwiftData.
+  - **Офлайн-режим**: если сеть недоступна, приложение считывает кэш из SwiftData и показывает данные с бейджем «Офлайн-режим».
 
 ---
 
@@ -117,7 +120,9 @@ WeatherAppIOS/
 ## Стек технологий
 - **Платформа**: iOS 18+ (iPhone / iPad)
 - **UI**: SwiftUI (минималистичный нативный интерфейс)
+- **База данных и кэш**: SwiftData (`@Model CachedWeatherItem`)
+- **Настройки и избранное**: UserDefaults (JSON Codable)
 - **Архитектура**: MVVM (Model-View-ViewModel)
 - **Реактивность**: Apple Observation (`@Observable`)
 - **Геолокация**: CoreLocation (асинхронный Swift Concurrency)
-- **Хранение данных**: UserDefaults (сохранение избранных городов и настроек)
+- **Тестирование**: Swift Testing (`@Test`, `#expect`)

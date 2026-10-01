@@ -5,6 +5,7 @@
 
 import Testing
 import Foundation
+import SwiftData
 @testable import WeatherAppIOS
 
 struct WeatherAppIOSTests {
@@ -79,5 +80,55 @@ struct WeatherAppIOSTests {
         #expect(!lightColors.isEmpty)
         #expect(!darkColors.isEmpty)
         #expect(lightColors != darkColors)
+    }
+
+    @Test func testSwiftDataWeatherCaching() async throws {
+        let schema = Schema([CachedWeatherItem.self])
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: schema, configurations: [config])
+
+        let storage = StorageService(defaults: .standard, modelContainer: container)
+        let service = MockWeatherService()
+        let weather = try await service.fetchWeather(for: .moscow)
+
+        storage.saveCachedWeather(weather)
+
+        let cached = storage.loadCachedWeather(for: weather.city.id)
+        #expect(cached != nil)
+        #expect(cached?.city.name == "Москва")
+        #expect(cached?.current.temperature == weather.current.temperature)
+    }
+
+    @Test @MainActor func testWeatherViewModelSavesBeforeSleepWithSwiftData() async throws {
+        let schema = Schema([CachedWeatherItem.self])
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: schema, configurations: [config])
+
+        let storage = StorageService(defaults: .standard, modelContainer: container)
+        let weatherService = MockWeatherService()
+
+        let vm = WeatherViewModel(
+            initialCity: .kazan,
+            weatherService: weatherService,
+            storageService: storage
+        )
+
+        await vm.loadWeather()
+        #expect(vm.currentWeather != nil)
+
+        // Имитируем вызов сохранения перед уходом в сон
+        vm.saveStateBeforeSleep()
+
+        let cached = storage.loadCachedWeather(for: City.kazan.id)
+        #expect(cached != nil)
+        #expect(cached?.city.name == "Казань")
+    }
+
+    @Test @MainActor func testWeatherCacheAgeDescription() async throws {
+        let vm = WeatherViewModel(initialCity: .moscow)
+        await vm.loadWeather()
+
+        #expect(vm.cacheAgeDescription != nil)
+        #expect(vm.formattedUpdateTime != nil)
     }
 }
