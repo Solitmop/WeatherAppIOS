@@ -124,6 +124,7 @@
 			fileSystemSynchronizedGroups = (
 				29A2CC853065850B00662DEA /* App */,
 				29A2CC863065851B00662DEA /* Models */,
+				29A2CC883065856E00662DEA /* Views */,
 				29A2CC893065858D00662DEA /* ViewModels */,
 				29A2CC8A306585A700662DEA /* Services */,
 			);
@@ -417,6 +418,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Приложению необходим доступ к геопозиции для отображения погоды в вашем регионе.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -446,6 +448,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Приложению необходим доступ к геопозиции для отображения погоды в вашем регионе.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
