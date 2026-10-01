@@ -5,11 +5,13 @@
 
 import SwiftUI
 
-/// Экран списка городов и поиска по городам
+/// Экран 2: Список избранных городов
 public struct CityListView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var cityListVM: CityListViewModel
     public var onSelectCity: (City) -> Void
+
+    @State private var showAddCitySheet = false
 
     public init(
         cityListVM: CityListViewModel,
@@ -21,39 +23,47 @@ public struct CityListView: View {
 
     public var body: some View {
         NavigationStack {
-            Group {
-                if !cityListVM.searchQuery.isEmpty {
-                    searchResultsView
-                } else {
-                    savedCitiesView
-                }
-            }
-            .navigationTitle("Города")
-            .navigationBarTitleDisplayMode(.inline)
-            .searchable(
-                text: $cityListVM.searchQuery,
-                placement: .navigationBarDrawer(displayMode: .always),
-                prompt: "Поиск по городам"
-            )
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Готово") {
-                        dismiss()
+            savedCitiesList
+                .navigationTitle("Избранные города")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            showAddCitySheet = true
+                        } label: {
+                            Image(systemName: "plus")
+                                .font(.body)
+                                .fontWeight(.semibold)
+                        }
                     }
-                    .fontWeight(.medium)
+
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Готово") {
+                            dismiss()
+                        }
+                        .fontWeight(.medium)
+                    }
                 }
-            }
-            .task {
-                if cityListVM.savedCitiesWeather.isEmpty {
-                    await cityListVM.loadSavedCitiesWeather()
+                .sheet(isPresented: $showAddCitySheet) {
+                    AddCityView(
+                        cityListVM: cityListVM,
+                        onSelectCity: { selectedCity in
+                            onSelectCity(selectedCity)
+                            dismiss()
+                        }
+                    )
                 }
-            }
+                .task {
+                    if cityListVM.savedCitiesWeather.isEmpty {
+                        await cityListVM.loadSavedCitiesWeather()
+                    }
+                }
         }
     }
 
     // MARK: - Список сохраненных городов
 
-    private var savedCitiesView: some View {
+    private var savedCitiesList: some View {
         List {
             ForEach(cityListVM.savedCitiesWeather) { weather in
                 CityCardView(weather: weather)
@@ -63,6 +73,7 @@ public struct CityListView: View {
                     .contentShape(Rectangle())
                     .onTapGesture {
                         onSelectCity(weather.city)
+                        dismiss()
                     }
             }
             .onDelete { indexSet in
@@ -76,66 +87,11 @@ public struct CityListView: View {
         .overlay {
             if cityListVM.savedCitiesWeather.isEmpty && !cityListVM.isLoading {
                 ContentUnavailableView(
-                    "Список пуст",
-                    systemImage: "building.2",
-                    description: Text("Найдите нужный город через поиск.")
+                    "Нет избранных городов",
+                    systemImage: "star.slash",
+                    description: Text("Нажмите на кнопку «+», чтобы найти и добавить города.")
                 )
             }
         }
-    }
-
-    // MARK: - Результаты поиска
-
-    private var searchResultsView: some View {
-        List {
-            if cityListVM.isSearching {
-                HStack {
-                    Spacer()
-                    ProgressView()
-                    Spacer()
-                }
-                .listRowBackground(Color.clear)
-            } else if cityListVM.searchResults.isEmpty {
-                ContentUnavailableView.search(text: cityListVM.searchQuery)
-            } else {
-                ForEach(cityListVM.searchResults) { city in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(city.name)
-                                .font(.body)
-                                .fontWeight(.medium)
-                            Text(city.region)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Spacer()
-
-                        if cityListVM.isCitySaved(city) {
-                            Text("Добавлен")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        } else {
-                            Button {
-                                Task {
-                                    await cityListVM.addCity(city)
-                                }
-                            } label: {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title3)
-                                    .foregroundStyle(.blue)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        onSelectCity(city)
-                    }
-                }
-            }
-        }
-        .listStyle(.insetGrouped)
     }
 }

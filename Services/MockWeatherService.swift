@@ -186,17 +186,6 @@ public final class MockWeatherService: WeatherServiceProtocol {
         }
     }
 
-    public func fetchWeatherForCoordinates(latitude: Double, longitude: Double) async throws -> CityWeather {
-        let city = City(
-            name: "Текущее местоположение",
-            region: "Определено по GPS",
-            latitude: latitude,
-            longitude: longitude,
-            isCurrentLocation: true
-        )
-        return try await fetchWeather(for: city)
-    }
-
     // MARK: - Генерация почасового и суточного прогнозов
 
     private func generateHourlyForecast(baseTemperature: Double, primaryCondition: WeatherCondition) -> [HourlyForecast] {

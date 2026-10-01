@@ -118,33 +118,31 @@ public final class CityListViewModel {
             return
         }
 
-        var newCity = city
-        newCity.isCurrentLocation = false
-        savedCities.append(newCity)
+        savedCities.append(city)
         storageService.saveFavoriteCities(savedCities)
 
         // Подгружаем сводку погоды для добавленного города
-        if let weather = try? await weatherService.fetchWeather(for: newCity) {
+        if let weather = try? await weatherService.fetchWeather(for: city) {
             savedCitiesWeather.append(weather)
         }
     }
 
     /// Удаление города из избранного по индексу
     public func deleteCity(at offsets: IndexSet) {
-        // Запрещаем удаление текущей геопозиции, если она первая
         let citiesToDelete = offsets.map { savedCities[$0] }
-        for city in citiesToDelete where !city.isCurrentLocation {
+        for city in citiesToDelete {
             savedCities.removeAll { $0.id == city.id }
             savedCitiesWeather.removeAll { $0.city.id == city.id }
+            storageService.deleteCachedWeather(for: city.id)
         }
         storageService.saveFavoriteCities(savedCities)
     }
 
     /// Удаление конкретного города
     public func deleteCity(_ city: City) {
-        guard !city.isCurrentLocation else { return }
         savedCities.removeAll { $0.id == city.id }
         savedCitiesWeather.removeAll { $0.city.id == city.id }
+        storageService.deleteCachedWeather(for: city.id)
         storageService.saveFavoriteCities(savedCities)
     }
 

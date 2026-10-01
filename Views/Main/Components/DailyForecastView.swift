@@ -5,86 +5,88 @@
 
 import SwiftUI
 
-/// Минималистичный прогноз на неделю
+/// Минималистичный прогноз на неделю в системе СИ (°C)
 public struct DailyForecastView: View {
     public let daily: [DailyForecast]
-    public let currentTemperature: Double
 
-    public init(daily: [DailyForecast], currentTemperature: Double) {
+    public init(daily: [DailyForecast], currentTemperature: Double? = nil) {
         self.daily = daily
-        self.currentTemperature = currentTemperature
     }
 
-    private var minWeekTemp: Double {
-        daily.map(\.lowTemperature).min() ?? 0
-    }
-
-    private var maxWeekTemp: Double {
-        daily.map(\.highTemperature).max() ?? 30
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.dateFormat = "d MMM"
+        return formatter.string(from: date)
     }
 
     public var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 12) {
             // Заголовок
             HStack(spacing: 6) {
                 Image(systemName: "calendar")
-                    .font(.caption2)
+                    .font(.caption)
                     .foregroundStyle(.secondary)
                 Text("ПРОГНОЗ НА 7 ДНЕЙ")
-                    .font(.caption2)
+                    .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 16)
-            .padding(.top, 12)
+            .padding(.top, 14)
 
             // Список дней
-            VStack(spacing: 12) {
+            VStack(spacing: 10) {
                 ForEach(Array(daily.enumerated()), id: \.element.id) { index, item in
-                    HStack(spacing: 10) {
-                        Text(item.dayTitle)
-                            .font(.callout)
-                            .foregroundStyle(.primary)
-                            .frame(width: 65, alignment: .leading)
+                    HStack(alignment: .center) {
+                        // День недели и дата
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(item.dayTitle)
+                                .font(.body)
+                                .fontWeight(index == 0 ? .semibold : .medium)
+                                .foregroundStyle(.primary)
 
-                        // Иконка и вероятность осадков
-                        HStack(spacing: 4) {
+                            Text(formatDate(item.date))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+                        .frame(width: 85, alignment: .leading)
+
+                        Spacer()
+
+                        // Иконка погоды и вероятность осадков
+                        HStack(spacing: 6) {
                             WeatherIconView(condition: item.condition)
-                                .font(.subheadline)
-                                .frame(width: 22)
+                                .font(.title3)
 
                             if item.precipitationProbability > 0 {
-                                Text("\(item.precipitationProbability)%")
-                                    .font(.system(size: 10, weight: .semibold))
-                                    .foregroundStyle(.blue)
-                                    .frame(width: 28, alignment: .leading)
-                            } else {
-                                Spacer().frame(width: 28)
+                                HStack(spacing: 2) {
+                                    Image(systemName: "drop.fill")
+                                        .font(.system(size: 8))
+                                    Text("\(item.precipitationProbability)%")
+                                        .font(.system(size: 11, weight: .semibold))
+                                }
+                                .foregroundStyle(.blue)
                             }
                         }
+                        .frame(minWidth: 60, alignment: .center)
 
-                        // Мин температура в СИ
-                        Text(MetricFormatter.temperature(item.lowTemperature, showSign: false))
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 32, alignment: .trailing)
+                        Spacer()
 
-                        // Индикатор диапазона
-                        TemperatureBarView(
-                            dayLow: item.lowTemperature,
-                            dayHigh: item.highTemperature,
-                            minWeekTemp: minWeekTemp,
-                            maxWeekTemp: maxWeekTemp,
-                            currentTemp: index == 0 ? currentTemperature : nil
-                        )
+                        // Температуры: максимум и минимум
+                        HStack(spacing: 12) {
+                            Text(MetricFormatter.temperature(item.highTemperature))
+                                .font(.system(.body, design: .rounded, weight: .semibold))
+                                .foregroundStyle(.primary)
+                                .frame(width: 44, alignment: .trailing)
 
-                        // Макс температура в СИ
-                        Text(MetricFormatter.temperature(item.highTemperature, showSign: false))
-                            .font(.callout)
-                            .fontWeight(.medium)
-                            .foregroundStyle(.primary)
-                            .frame(width: 32, alignment: .leading)
+                            Text(MetricFormatter.temperature(item.lowTemperature))
+                                .font(.system(.body, design: .rounded, weight: .regular))
+                                .foregroundStyle(.secondary)
+                                .frame(width: 44, alignment: .trailing)
+                        }
                     }
+                    .padding(.vertical, 2)
 
                     if index < daily.count - 1 {
                         Divider()
@@ -93,10 +95,10 @@ public struct DailyForecastView: View {
                 }
             }
             .padding(.horizontal, 16)
-            .padding(.bottom, 12)
+            .padding(.bottom, 14)
         }
         .background(Color(uiColor: .secondarySystemGroupedBackground).opacity(0.8))
-        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .padding(.horizontal, 16)
     }
 }

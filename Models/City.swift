@@ -13,7 +13,6 @@ public struct City: Identifiable, Codable, Hashable, Equatable, Sendable {
     public var latitude: Double
     public var longitude: Double
     public var timeZoneIdentifier: String
-    public var isCurrentLocation: Bool
 
     public init(
         id: UUID = UUID(),
@@ -21,8 +20,7 @@ public struct City: Identifiable, Codable, Hashable, Equatable, Sendable {
         region: String,
         latitude: Double,
         longitude: Double,
-        timeZoneIdentifier: String = "Europe/Moscow",
-        isCurrentLocation: Bool = false
+        timeZoneIdentifier: String = "Europe/Moscow"
     ) {
         self.id = id
         self.name = name
@@ -30,7 +28,6 @@ public struct City: Identifiable, Codable, Hashable, Equatable, Sendable {
         self.latitude = latitude
         self.longitude = longitude
         self.timeZoneIdentifier = timeZoneIdentifier
-        self.isCurrentLocation = isCurrentLocation
     }
 
     /// Локальное время в городе
@@ -44,11 +41,7 @@ public struct City: Identifiable, Codable, Hashable, Equatable, Sendable {
     }
 
     public var subtitle: String {
-        if isCurrentLocation {
-            return "Текущее местоположение"
-        } else {
-            return region
-        }
+        region
     }
 }
 
@@ -59,8 +52,7 @@ extension City {
         region: "Московская область",
         latitude: 55.7558,
         longitude: 37.6173,
-        timeZoneIdentifier: "Europe/Moscow",
-        isCurrentLocation: true
+        timeZoneIdentifier: "Europe/Moscow"
     )
 
     public static let saintPetersburg = City(

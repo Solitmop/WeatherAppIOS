@@ -5,9 +5,8 @@
 
 import Foundation
 import Observation
-import CoreLocation
 
-/// Главная ViewModel экрана детальной погоды выбранного города с поддержкой офлайн-кэширования
+/// Главная ViewModel экрана детальной погоды выбранного города
 @Observable
 @MainActor
 public final class WeatherViewModel {
@@ -17,6 +16,7 @@ public final class WeatherViewModel {
     public var isRefreshing: Bool = false
     public var isFromCache: Bool = false
     public var errorMessage: String?
+    public var showNoInternetToast: Bool = false
 
     /// Описание давности кэша («5 минут назад», «1 час назад» и т.д.)
     public var cacheAgeDescription: String? {
@@ -37,42 +37,50 @@ public final class WeatherViewModel {
     }
 
     private let weatherService: WeatherServiceProtocol
-    private let locationService: LocationServiceProtocol
     private let storageService: StorageServiceProtocol
+    private let networkMonitor: NetworkMonitor
+    private var toastDismissTask: Task<Void, Never>?
 
     public init(
         initialCity: City = .moscow,
         weatherService: WeatherServiceProtocol = MockWeatherService(),
-        locationService: LocationServiceProtocol = LocationService.shared,
-        storageService: StorageServiceProtocol = StorageService.shared
+        storageService: StorageServiceProtocol = StorageService.shared,
+        networkMonitor: NetworkMonitor = NetworkMonitor.shared
     ) {
         self.selectedCity = initialCity
         self.weatherService = weatherService
-        self.locationService = locationService
         self.storageService = storageService
+        self.networkMonitor = networkMonitor
 
-        // Проверяем, был ли сохранен последний выбранный город
+        // Проверяем сохраненный последний выбранный город
         if let lastId = storageService.loadLastSelectedCityId(),
            let saved = storageService.loadFavoriteCities().first(where: { $0.id == lastId }) {
             self.selectedCity = saved
         }
 
-        // Загружаем сохраненный кэш погоды для мгновенного отображения при запуске
+        // Загружаем кэш для мгновенного отображения при запуске
         if let cached = storageService.loadCachedWeather(for: self.selectedCity.id) {
             self.currentWeather = cached
             self.isFromCache = true
         }
     }
 
-    /// Загрузка погоды для выбранного города (с поддержкой офлайн-режима)
+    /// Загрузка погоды для выбранного города
     public func loadWeather() async {
         guard !isLoading else { return }
         isLoading = true
 
-        // Если данных еще нет в памяти, пробуем подтянуть из дискового кэша
+        // Если в памяти еще нет данных, поднимаем из дискового кэша
         if currentWeather == nil, let cached = storageService.loadCachedWeather(for: selectedCity.id) {
             self.currentWeather = cached
             self.isFromCache = true
+        }
+
+        // Проверка подключения к интернету
+        if !networkMonitor.isConnected {
+            triggerNoInternetNotification()
+            self.isLoading = false
+            return
         }
 
         do {
@@ -81,14 +89,13 @@ public final class WeatherViewModel {
             self.isFromCache = false
             self.errorMessage = nil
 
-            // 1. Сохранение сразу после получения актуальных данных
+            // Сохранение в кэш сразу после получения данных
             storageService.saveCachedWeather(weather)
             storageService.saveLastSelectedCityId(selectedCity.id)
         } catch {
+            triggerNoInternetNotification()
             if self.currentWeather != nil {
-                // Если данные уже есть (из кэша), остаемся в офлайн-режиме без падения экрана
                 self.isFromCache = true
-                self.errorMessage = "Офлайн-режим. Показаны сохраненные данные"
             } else {
                 self.errorMessage = error.localizedDescription
             }
@@ -100,18 +107,24 @@ public final class WeatherViewModel {
     /// Обновление погоды (pull-to-refresh)
     public func refresh() async {
         isRefreshing = true
+
+        if !networkMonitor.isConnected {
+            triggerNoInternetNotification()
+            self.isRefreshing = false
+            return
+        }
+
         do {
             let weather = try await weatherService.fetchWeather(for: selectedCity)
             self.currentWeather = weather
             self.isFromCache = false
             self.errorMessage = nil
 
-            // Сохранение сразу после получения обновленных данных
             storageService.saveCachedWeather(weather)
         } catch {
+            triggerNoInternetNotification()
             if self.currentWeather != nil {
                 self.isFromCache = true
-                self.errorMessage = "Офлайн-режим: нет подключения к сети"
             } else {
                 self.errorMessage = error.localizedDescription
             }
@@ -119,13 +132,13 @@ public final class WeatherViewModel {
         self.isRefreshing = false
     }
 
-    /// Смена активного города (например, по клику в списке городов)
+    /// Смена активного города
     public func selectCity(_ city: City) async {
         guard city.id != selectedCity.id || currentWeather == nil else { return }
         self.selectedCity = city
         self.storageService.saveLastSelectedCityId(city.id)
 
-        // Мгновенно отображаем кэш для выбранного города, если он есть
+        // Мгновенно отображаем кэш для выбранного города
         if let cached = storageService.loadCachedWeather(for: city.id) {
             self.currentWeather = cached
             self.isFromCache = true
@@ -134,37 +147,27 @@ public final class WeatherViewModel {
         await loadWeather()
     }
 
-    /// Запрос геолокации и загрузка погоды по текущему местоположению
-    public func loadCurrentLocationWeather() async {
-        isLoading = true
-
-        do {
-            let coords = try await locationService.requestCurrentCoordinates()
-            let weather = try await weatherService.fetchWeatherForCoordinates(
-                latitude: coords.latitude,
-                longitude: coords.longitude
-            )
-            self.selectedCity = weather.city
-            self.currentWeather = weather
-            self.isFromCache = false
-            self.errorMessage = nil
-
-            // Сохранение сразу после получения
-            storageService.saveCachedWeather(weather)
-        } catch {
-            self.errorMessage = "Не удалось получить геопозицию: \(error.localizedDescription)"
-        }
-
-        self.isLoading = false
-    }
-
-    // MARK: - Сохранение перед уходом в спящий режим
-
     /// Сохранение текущего состояния погоды перед сворачиванием / уходом в спящий режим
     public func saveStateBeforeSleep() {
         if let current = currentWeather {
             storageService.saveCachedWeather(current)
         }
         storageService.saveLastSelectedCityId(selectedCity.id)
+    }
+
+    /// Вызов всплывающего уведомления об отсутствии интернета с автоскрытием
+    public func triggerNoInternetNotification() {
+        showNoInternetToast = true
+        toastDismissTask?.cancel()
+        toastDismissTask = Task {
+            try? await Task.sleep(nanoseconds: 3_500_000_000)
+            guard !Task.isCancelled else { return }
+            self.showNoInternetToast = false
+        }
+    }
+
+    public func dismissNoInternetNotification() {
+        toastDismissTask?.cancel()
+        showNoInternetToast = false
     }
 }

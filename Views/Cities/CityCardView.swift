@@ -17,17 +17,10 @@ public struct CityCardView: View {
         HStack(alignment: .center) {
             // Левая часть: название и регион
             VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 4) {
-                    if weather.city.isCurrentLocation {
-                        Image(systemName: "location.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                    Text(weather.city.name)
-                        .font(.title3)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.primary)
-                }
+                Text(weather.city.name)
+                    .font(.title3)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.primary)
 
                 Text(weather.city.subtitle)
                     .font(.caption)

@@ -21,6 +21,7 @@ public protocol StorageServiceProtocol: Sendable {
     func saveCachedWeather(_ weather: CityWeather)
     func loadAllCachedWeather() -> [UUID: CityWeather]
     func saveAllCachedWeather(_ weatherDict: [UUID: CityWeather])
+    func deleteCachedWeather(for cityId: UUID)
 }
 
 /// Гибридное хранилище
@@ -174,6 +175,20 @@ public final class StorageService: StorageServiceProtocol, @unchecked Sendable {
     public func saveAllCachedWeather(_ weatherDict: [UUID: CityWeather]) {
         for (_, weather) in weatherDict {
             saveCachedWeather(weather)
+        }
+    }
+
+    public func deleteCachedWeather(for cityId: UUID) {
+        let context = ModelContext(modelContainer)
+        let predicate = #Predicate<CachedWeatherItem> { item in
+            item.cityId == cityId
+        }
+        var descriptor = FetchDescriptor<CachedWeatherItem>(predicate: predicate)
+        descriptor.fetchLimit = 1
+
+        if let existing = try? context.fetch(descriptor).first {
+            context.delete(existing)
+            try? context.save()
         }
     }
 }

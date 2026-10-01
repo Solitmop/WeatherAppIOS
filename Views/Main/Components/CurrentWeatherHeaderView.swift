@@ -17,17 +17,10 @@ public struct CurrentWeatherHeaderView: View {
 
     public var body: some View {
         VStack(spacing: 4) {
-            // Город и геопозиция
-            HStack(spacing: 6) {
-                if city.isCurrentLocation {
-                    Image(systemName: "location.fill")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-                Text(city.name)
-                    .font(.system(size: 32, weight: .bold, design: .default))
-                    .foregroundStyle(.primary)
-            }
+            // Город
+            Text(city.name)
+                .font(.system(size: 32, weight: .bold, design: .default))
+                .foregroundStyle(.primary)
 
             // Статус погоды
             Text(current.condition.descriptionRu)

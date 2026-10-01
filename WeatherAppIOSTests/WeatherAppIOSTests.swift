@@ -131,4 +131,31 @@ struct WeatherAppIOSTests {
         #expect(vm.cacheAgeDescription != nil)
         #expect(vm.formattedUpdateTime != nil)
     }
+
+    @Test func testSwiftDataWeatherDeletion() async throws {
+        let schema = Schema([CachedWeatherItem.self])
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)
+        let container = try ModelContainer(for: schema, configurations: [config])
+
+        let storage = StorageService(defaults: .standard, modelContainer: container)
+        let service = MockWeatherService()
+        let weather = try await service.fetchWeather(for: .sochi)
+
+        storage.saveCachedWeather(weather)
+        #expect(storage.loadCachedWeather(for: weather.city.id) != nil)
+
+        storage.deleteCachedWeather(for: weather.city.id)
+        #expect(storage.loadCachedWeather(for: weather.city.id) == nil)
+    }
+
+    @Test @MainActor func testNoInternetNotificationToast() {
+        let vm = WeatherViewModel(initialCity: .moscow)
+        #expect(!vm.showNoInternetToast)
+
+        vm.triggerNoInternetNotification()
+        #expect(vm.showNoInternetToast)
+
+        vm.dismissNoInternetNotification()
+        #expect(!vm.showNoInternetToast)
+    }
 }

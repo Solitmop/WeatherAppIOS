@@ -10,7 +10,7 @@ public enum WeatherServiceError: LocalizedError, Sendable {
     case cityNotFound
     case networkError(String)
     case invalidResponse
-    case locationUnavailable
+    case noInternetConnection
 
     public var errorDescription: String? {
         switch self {
@@ -20,8 +20,8 @@ public enum WeatherServiceError: LocalizedError, Sendable {
             return "Ошибка сети: \(message)"
         case .invalidResponse:
             return "Некорректный ответ от сервера"
-        case .locationUnavailable:
-            return "Не удалось определить местоположение"
+        case .noInternetConnection:
+            return "Отсутствует подключение к интернету"
         }
     }
 }
@@ -33,7 +33,4 @@ public protocol WeatherServiceProtocol: Sendable {
 
     /// Поиск городов по текстовому запросу
     func searchCities(query: String) async throws -> [City]
-
-    /// Получение погоды по географическим координатам (например, текущей геопозиции)
-    func fetchWeatherForCoordinates(latitude: Double, longitude: Double) async throws -> CityWeather
 }

@@ -39,7 +39,7 @@ public struct WeatherMainView: View {
             } else if let weather = weatherVM.currentWeather {
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 16) {
-                        // Верхняя панель
+                        // Верхняя панель управления
                         HStack {
                             Button {
                                 showSettingsSheet = true
@@ -53,19 +53,6 @@ public struct WeatherMainView: View {
                             }
 
                             Spacer()
-
-                            Button {
-                                Task {
-                                    await weatherVM.loadCurrentLocationWeather()
-                                }
-                            } label: {
-                                Image(systemName: "location")
-                                    .font(.body)
-                                    .foregroundStyle(.primary)
-                                    .padding(8)
-                                    .background(Color(uiColor: .secondarySystemGroupedBackground).opacity(0.8))
-                                    .clipShape(Circle())
-                            }
 
                             Button {
                                 showCityListSheet = true
@@ -119,10 +106,7 @@ public struct WeatherMainView: View {
                         )
 
                         // Прогноз на 7 дней
-                        DailyForecastView(
-                            daily: weather.daily,
-                            currentTemperature: weather.current.temperature
-                        )
+                        DailyForecastView(daily: weather.daily)
 
                         // Сетка метрик в системе СИ
                         LazyVGrid(columns: columns, spacing: 12) {
@@ -184,6 +168,46 @@ public struct WeatherMainView: View {
                 }
             }
         }
+        .overlay(alignment: .top) {
+            if weatherVM.showNoInternetToast {
+                HStack(spacing: 10) {
+                    Image(systemName: "wifi.slash")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white)
+
+                    Text("Отсутствует интернет. Показаны сохраненные данные.")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
+
+                    Spacer(minLength: 4)
+
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            weatherVM.dismissNoInternetNotification()
+                        }
+                    } label: {
+                        Image(systemName: "xmark")
+                            .font(.caption2)
+                            .foregroundStyle(.white.opacity(0.8))
+                            .padding(4)
+                    }
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(Color(red: 0.15, green: 0.15, blue: 0.18).opacity(0.96))
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                )
+                .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 4)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: weatherVM.showNoInternetToast)
         .sheet(isPresented: $showCityListSheet) {
             CityListView(
                 cityListVM: cityListVM,
