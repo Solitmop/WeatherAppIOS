@@ -170,10 +170,13 @@ public struct WeatherMainView: View {
                     }
                 }
             )
+            .preferredColorScheme(settingsVM.appTheme.colorScheme)
         }
         .sheet(isPresented: $showSettingsSheet) {
             SettingsView(settingsVM: settingsVM)
+                .preferredColorScheme(settingsVM.appTheme.colorScheme)
         }
+        .preferredColorScheme(settingsVM.appTheme.colorScheme)
         .task {
             if weatherVM.currentWeather == nil {
                 await weatherVM.loadWeather()

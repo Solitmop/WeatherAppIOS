@@ -70,4 +70,14 @@ struct WeatherAppIOSTests {
         vm.deleteCity(samara)
         #expect(!vm.isCitySaved(samara))
     }
+
+    @Test func testWeatherConditionBackgroundColors() {
+        let condition = WeatherCondition.clearDay
+        let lightColors = condition.backgroundColors(for: .light)
+        let darkColors = condition.backgroundColors(for: .dark)
+
+        #expect(!lightColors.isEmpty)
+        #expect(!darkColors.isEmpty)
+        #expect(lightColors != darkColors)
+    }
 }

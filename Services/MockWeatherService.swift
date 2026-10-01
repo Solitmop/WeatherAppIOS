@@ -5,12 +5,12 @@
 
 import Foundation
 
-/// Мок-сервис с данными исключительно для городов России
+/// Мок-сервис с данными городов России
 public final class MockWeatherService: WeatherServiceProtocol {
 
     public init() {}
 
-    /// Каталог доступных российских городов
+    /// Каталог доступных городов
     public var availableCities: [City] = [
         .moscow,
         .saintPetersburg,

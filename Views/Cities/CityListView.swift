@@ -5,7 +5,7 @@
 
 import SwiftUI
 
-/// Экран списка городов и поиска по городам России
+/// Экран списка городов и поиска по городам
 public struct CityListView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var cityListVM: CityListViewModel
@@ -33,7 +33,7 @@ public struct CityListView: View {
             .searchable(
                 text: $cityListVM.searchQuery,
                 placement: .navigationBarDrawer(displayMode: .always),
-                prompt: "Поиск по городам России"
+                prompt: "Поиск по городам"
             )
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
@@ -78,7 +78,7 @@ public struct CityListView: View {
                 ContentUnavailableView(
                     "Список пуст",
                     systemImage: "building.2",
-                    description: Text("Найдите нужный город России через поиск.")
+                    description: Text("Найдите нужный город через поиск.")
                 )
             }
         }

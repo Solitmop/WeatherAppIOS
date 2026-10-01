@@ -112,27 +112,51 @@ public enum WeatherCondition: String, Codable, CaseIterable, Sendable {
         }
     }
 
-    /// Спокойные минималистичные оттенки для фона (сдержанный мягкий градиент)
-    public var backgroundColors: [Color] {
-        switch self {
-        case .clearDay:
-            return [Color(white: 0.18), Color(white: 0.12)]
-        case .clearNight:
-            return [Color(white: 0.12), Color(white: 0.07)]
-        case .partlyCloudyDay:
-            return [Color(white: 0.20), Color(white: 0.13)]
-        case .partlyCloudyNight:
-            return [Color(white: 0.13), Color(white: 0.08)]
-        case .cloudy, .overcast, .fog:
-            return [Color(white: 0.22), Color(white: 0.14)]
-        case .drizzle, .rain, .heavyRain:
-            return [Color(red: 0.12, green: 0.16, blue: 0.22), Color(white: 0.10)]
-        case .thunderstorm:
-            return [Color(red: 0.14, green: 0.14, blue: 0.20), Color(white: 0.08)]
-        case .snow, .sleet:
-            return [Color(red: 0.16, green: 0.20, blue: 0.24), Color(white: 0.11)]
-        case .windy:
-            return [Color(white: 0.19), Color(white: 0.12)]
+    /// Спокойные минималистичные оттенки для фона с адаптацией под цветовую тему
+    public func backgroundColors(for colorScheme: ColorScheme) -> [Color] {
+        if colorScheme == .dark {
+            switch self {
+            case .clearDay:
+                return [Color(red: 0.13, green: 0.17, blue: 0.24), Color(red: 0.08, green: 0.10, blue: 0.15)]
+            case .clearNight:
+                return [Color(red: 0.08, green: 0.10, blue: 0.18), Color(red: 0.05, green: 0.06, blue: 0.11)]
+            case .partlyCloudyDay:
+                return [Color(red: 0.14, green: 0.17, blue: 0.22), Color(red: 0.09, green: 0.11, blue: 0.15)]
+            case .partlyCloudyNight:
+                return [Color(red: 0.10, green: 0.11, blue: 0.18), Color(red: 0.06, green: 0.07, blue: 0.12)]
+            case .cloudy, .overcast, .fog:
+                return [Color(white: 0.16), Color(white: 0.10)]
+            case .drizzle, .rain, .heavyRain:
+                return [Color(red: 0.11, green: 0.15, blue: 0.22), Color(red: 0.07, green: 0.09, blue: 0.14)]
+            case .thunderstorm:
+                return [Color(red: 0.14, green: 0.13, blue: 0.20), Color(red: 0.08, green: 0.07, blue: 0.13)]
+            case .snow, .sleet:
+                return [Color(red: 0.13, green: 0.17, blue: 0.21), Color(red: 0.08, green: 0.11, blue: 0.14)]
+            case .windy:
+                return [Color(red: 0.12, green: 0.16, blue: 0.19), Color(red: 0.08, green: 0.10, blue: 0.13)]
+            }
+        } else {
+            // Светлая тема: чистые, светлые, воздушные оттенки с высокой контрастностью текста
+            switch self {
+            case .clearDay:
+                return [Color(red: 0.88, green: 0.94, blue: 1.0), Color(red: 0.95, green: 0.97, blue: 1.0)]
+            case .clearNight:
+                return [Color(red: 0.90, green: 0.92, blue: 0.97), Color(red: 0.95, green: 0.95, blue: 0.98)]
+            case .partlyCloudyDay:
+                return [Color(red: 0.90, green: 0.94, blue: 0.98), Color(red: 0.95, green: 0.97, blue: 0.99)]
+            case .partlyCloudyNight:
+                return [Color(red: 0.91, green: 0.92, blue: 0.97), Color(red: 0.95, green: 0.96, blue: 0.98)]
+            case .cloudy, .overcast, .fog:
+                return [Color(red: 0.91, green: 0.93, blue: 0.95), Color(red: 0.95, green: 0.96, blue: 0.98)]
+            case .drizzle, .rain, .heavyRain:
+                return [Color(red: 0.88, green: 0.92, blue: 0.96), Color(red: 0.94, green: 0.96, blue: 0.98)]
+            case .thunderstorm:
+                return [Color(red: 0.89, green: 0.90, blue: 0.96), Color(red: 0.94, green: 0.95, blue: 0.98)]
+            case .snow, .sleet:
+                return [Color(red: 0.91, green: 0.95, blue: 0.99), Color(red: 0.96, green: 0.98, blue: 1.0)]
+            case .windy:
+                return [Color(red: 0.90, green: 0.94, blue: 0.96), Color(red: 0.95, green: 0.97, blue: 0.98)]
+            }
         }
     }
 }

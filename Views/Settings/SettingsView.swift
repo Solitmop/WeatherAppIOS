@@ -61,5 +61,6 @@ public struct SettingsView: View {
                 }
             }
         }
+        .preferredColorScheme(settingsVM.appTheme.colorScheme)
     }
 }
