@@ -49,9 +49,8 @@ public struct DailyForecastView: View {
 
                         // Иконка и вероятность осадков
                         HStack(spacing: 4) {
-                            Image(systemName: item.condition.sfSymbolName)
+                            WeatherIconView(condition: item.condition)
                                 .font(.subheadline)
-                                .foregroundStyle(item.condition.iconColor)
                                 .frame(width: 22)
 
                             if item.precipitationProbability > 0 {

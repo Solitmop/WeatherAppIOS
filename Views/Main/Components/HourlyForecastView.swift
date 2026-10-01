@@ -39,9 +39,8 @@ public struct HourlyForecastView: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
 
-                            Image(systemName: item.condition.sfSymbolName)
+                            WeatherIconView(condition: item.condition)
                                 .font(.body)
-                                .foregroundStyle(item.condition.iconColor)
                                 .frame(height: 22)
 
                             if item.precipitationProbability > 0 {

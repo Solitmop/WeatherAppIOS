@@ -34,9 +34,8 @@ public struct CityCardView: View {
                     .foregroundStyle(.secondary)
 
                 HStack(spacing: 6) {
-                    Image(systemName: weather.current.condition.sfSymbolName)
+                    WeatherIconView(condition: weather.current.condition)
                         .font(.caption)
-                        .foregroundStyle(weather.current.condition.iconColor)
 
                     Text(weather.current.condition.descriptionRu)
                         .font(.caption)
